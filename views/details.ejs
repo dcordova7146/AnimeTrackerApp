@@ -1,0 +1,55 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-4">
+      <img
+        src="<%= anime.images.jpg.image_url %>"
+        alt="<%= anime.title %>"
+        class="img-fluid"
+      />
+    </div>
+    <div class="col-md-8">
+      <h1><%= anime.title %></h1>
+      <p><%= anime.synopsis %></p>
+      <p><strong>Episodes:</strong> <%= anime.episodes %></p>
+      <p><strong>Score:</strong> <%= anime.score %></p>
+      <p><strong>Status:</strong> <%= anime.status %></p>
+    </div>
+  </div>
+
+  <form id="addToListForm">
+    <input type="hidden" name="animeTitle" value="<%= anime.title %>" />
+    <input type="hidden" name="animeId" value="<%= anime.mal_id %>" />
+    <button type="submit" class="btn btn-primary">Add to List</button>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById("addToListForm"); // listen for add to list button to try and add it to a users anime list
+  if (form) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch("/anime-details/add-to-list", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert(result.message);
+        } else {
+          alert(result.error);
+        }
+      } catch (error) {
+        console.error("Couldnt add to list", error); // usually if no session data exists
+        alert("Failed to add anime to your list");
+      }
+    });
+  }
+</script>
+<%- include('partials/footer') %>

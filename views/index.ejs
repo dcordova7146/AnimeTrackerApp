@@ -1,0 +1,59 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Search Anime</h1>
+  <input
+    type="text"
+    id="animeSearch"
+    class="form-control mb-3"
+    placeholder="Search for anime..."
+  />
+  <div id="searchResults" class="row gy-4"></div>
+</div>
+
+<script>
+  const searchInput = document.getElementById("animeSearch");
+  const resultsContainer = document.getElementById("searchResults");
+
+  searchInput.addEventListener("input", async (event) => {
+    //dynamic search bar using api
+    const query = event.target.value.trim();
+    resultsContainer.innerHTML = ""; 
+
+    if (query.length > 2) { // begins asking the api after at least 2 letters are in the search bar
+      try {
+        const response = await fetch( // use api 
+          `/search-anime?query=${encodeURIComponent(query)}`
+        );
+        const data = await response.json(); // extract data from api call
+        if (data.data) {
+          displayResults(data.data);
+        } else {
+          resultsContainer.innerHTML = "<p>No results found.</p>";
+        }
+      } catch (error) {
+        console.error("Error fetching anime:", error);
+        resultsContainer.innerHTML = "<p>Error fetching results.</p>";
+      }
+    }
+  });
+
+  function displayResults(animeList) { // format the api call result into a card with the name of the anime and the accompanying image
+    resultsContainer.innerHTML = "";
+    animeList.forEach((anime) => {
+      const animeCard = document.createElement("div");
+      animeCard.classList.add("col-md-3", "col-sm-6");
+      animeCard.innerHTML = `
+      <div class="card h-100" onclick="window.location.href='/anime-details/${anime.mal_id}'">
+        <img src="${anime.images.jpg.image_url}" class="card-img-top" alt="${anime.title}">
+        <div class="card-body">
+          <h5 class="card-title">${anime.title}</h5>
+        </div>
+      </div>
+    `;
+      resultsContainer.appendChild(animeCard);
+    });
+  }
+</script>
+
+<%- include('partials/footer') %>
